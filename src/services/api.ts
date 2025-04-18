@@ -2,7 +2,7 @@
 import axios from '@/lib/axios';
 import { toast } from "sonner";
 
-const API_BASE_URL = 'http://mystock-admin.scriptbasket.com/api';
+const API_BASE_URL = 'https://mystock-admin.scriptbasket.com/api';
 
 interface LoginCredentials {
   email: string;
