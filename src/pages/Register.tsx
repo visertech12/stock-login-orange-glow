@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FaUser, FaKey, FaPhone, FaGlobe } from 'react-icons/fa';
+import { FaUser, FaKey } from 'react-icons/fa';
 import { MdEmail } from 'react-icons/md';
-import { isValidEmail, isValidPhone } from '@/lib/utils';
+import { isValidEmail } from '@/lib/utils';
 import { toast } from 'sonner';
 import { apiService } from '@/services/api';
 import { Loader2 } from 'lucide-react';
@@ -11,65 +10,64 @@ import { Loader2 } from 'lucide-react';
 const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const [formData, setFormData] = useState({
-    username: '',
     email: '',
-    mobile: '',
-    country_code: 'US',
+    name: '',
+    username: '',
     password: '',
-    password_confirmation: '',
-    inviteCode: '',
-    firstname: '',
-    lastname: ''
+    withdraw_pin: '',
+    ref_id: null
   });
+
   const [isLoading, setIsLoading] = useState(false);
 
-  // Extract referral code from URL if present
+  // Extract referral code from URL
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const ref = params.get('ref');
     if (ref) {
-      setFormData(prev => ({ ...prev, inviteCode: ref }));
+      setFormData(prev => ({ ...prev, ref_id: ref }));
     }
   }, [location]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     try {
-      // Validate all fields
-      if (!formData.username || formData.username.length < 3) {
-        throw new Error('Username must be at least 3 characters');
+      // Validations
+      if (!formData.name || formData.name.length < 2) {
+        throw new Error('Please enter your name');
       }
-      
+
       if (!isValidEmail(formData.email)) {
         throw new Error('Please enter a valid email address');
       }
-      
-      if (!isValidPhone(formData.mobile)) {
-        throw new Error('Please enter a valid phone number');
+
+      if (!formData.username || formData.username.length < 3) {
+        throw new Error('Username must be at least 3 characters');
       }
-      
-      if (formData.password.length < 6) {
+
+      if (!formData.password || formData.password.length < 6) {
         throw new Error('Password must be at least 6 characters');
       }
-      
-      if (formData.password !== formData.password_confirmation) {
-        throw new Error('Passwords do not match');
+
+      if (!formData.withdraw_pin || formData.withdraw_pin.length < 4) {
+        throw new Error('Withdraw PIN must be at least 4 digits');
       }
-      
+
+      // API call
       await apiService.register(formData);
-      
+
       toast.success("Registration successful! Please login.");
       navigate('/');
-      
+
     } catch (error: any) {
       toast.error(error.message || 'Registration failed');
     } finally {
@@ -80,16 +78,16 @@ const Register = () => {
   return (
     <div className="auth-container">
       <div className="auth-bg-gradient"></div>
-      
+
       <img 
         className="absolute top-[-25px] right-[-25px] w-[30%] mix-blend-multiply rotate-[40deg] scale-[1.1] opacity-[60%]"
         src="https://cdn-icons-png.flaticon.com/128/11069/11069063.png"
         alt="decorative"
       />
-      
+
       <div className="relative z-10">
         <div className="p-[15px]"></div>
-        
+
         <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-8 lg:px-8">
           <div className="sm:mx-auto sm:w-full sm:max-w-sm">
             <img
@@ -97,7 +95,6 @@ const Register = () => {
               src="https://mystock-admin.scriptbasket.com/assets/images/logoIcon/logo.png"
               alt="myStock"
             />
-            
             <h2 className="mt-10 text-center text-2xl font-bold leading-9 tracking-tight text-white drop-shadow-md">
               REGISTER
             </h2>
@@ -105,24 +102,25 @@ const Register = () => {
 
           <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
             <form className="space-y-3" onSubmit={handleSubmit}>
-              {/* Username Input */}
+
+              {/* Full Name */}
               <div className="relative">
                 <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                   <FaUser className="text-orange-500 h-4 w-4" />
                 </div>
                 <input
                   type="text"
-                  name="username"
+                  name="name"
                   className="auth-input"
-                  placeholder="Username"
-                  value={formData.username}
+                  placeholder="Full Name"
+                  value={formData.name}
                   onChange={handleChange}
                   required
                   disabled={isLoading}
                 />
               </div>
 
-              {/* Email Input */}
+              {/* Email */}
               <div className="relative">
                 <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                   <MdEmail className="text-orange-500 h-4 w-4" />
@@ -139,44 +137,24 @@ const Register = () => {
                 />
               </div>
 
-              {/* Mobile Input */}
+              {/* Username */}
               <div className="relative">
                 <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-                  <FaPhone className="text-orange-500 h-4 w-4" />
+                  <FaUser className="text-orange-500 h-4 w-4" />
                 </div>
                 <input
-                  type="tel"
-                  name="mobile"
+                  type="text"
+                  name="username"
                   className="auth-input"
-                  placeholder="Mobile Number"
-                  value={formData.mobile}
+                  placeholder="Username"
+                  value={formData.username}
                   onChange={handleChange}
                   required
                   disabled={isLoading}
                 />
               </div>
 
-              {/* Country Code */}
-              <div className="relative">
-                <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-                  <FaGlobe className="text-orange-500 h-4 w-4" />
-                </div>
-                <select
-                  name="country_code"
-                  className="auth-input"
-                  value={formData.country_code}
-                  onChange={handleChange}
-                  disabled={isLoading}
-                >
-                  <option value="US">United States</option>
-                  <option value="GB">United Kingdom</option>
-                  <option value="CA">Canada</option>
-                  <option value="AU">Australia</option>
-                  <option value="BD">Bangladesh</option>
-                </select>
-              </div>
-
-              {/* Password Input */}
+              {/* Password */}
               <div className="relative">
                 <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                   <FaKey className="text-orange-500 h-4 w-4" />
@@ -193,35 +171,19 @@ const Register = () => {
                 />
               </div>
 
-              {/* Confirm Password Input */}
+              {/* Withdraw PIN */}
               <div className="relative">
                 <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
                   <FaKey className="text-orange-500 h-4 w-4" />
                 </div>
                 <input
                   type="password"
-                  name="password_confirmation"
+                  name="withdraw_pin"
                   className="auth-input"
-                  placeholder="Confirm Password"
-                  value={formData.password_confirmation}
+                  placeholder="Withdraw PIN"
+                  value={formData.withdraw_pin}
                   onChange={handleChange}
                   required
-                  disabled={isLoading}
-                />
-              </div>
-
-              {/* Invite Code Input */}
-              <div className="relative">
-                <div className="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none">
-                  <FaUser className="text-orange-500 h-4 w-4" />
-                </div>
-                <input
-                  type="text"
-                  name="inviteCode"
-                  className="auth-input"
-                  placeholder="Invite Code (Optional)"
-                  value={formData.inviteCode}
-                  onChange={handleChange}
                   disabled={isLoading}
                 />
               </div>
