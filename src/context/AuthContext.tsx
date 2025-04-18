@@ -2,6 +2,10 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { apiService } from '@/services/api';
 import { toast } from "sonner";
+import axios from '@/lib/axios';
+
+// Define the API base URL constant
+const API_BASE_URL = 'http://mystock-admin.scriptbasket.com/api';
 
 interface User {
   id: string;
