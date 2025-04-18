@@ -4,13 +4,16 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaKey } from 'react-icons/fa';
 import { Loader2 } from 'lucide-react';
 import { isValidEmail } from '@/lib/utils';
-import { toast } from '@/components/ui/use-toast';
+import { toast } from 'sonner';
+import { apiService } from '@/services/api';
+import { useAuth } from '@/context/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { setUser } = useAuth();
   
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -20,16 +23,13 @@ const Login = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const [error, setError] = useState('');
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
     
     try {
       // Basic validation
-      if (!formData.username) {
+      if (!formData.email) {
         throw new Error('Username or email is required');
       }
       
@@ -37,35 +37,23 @@ const Login = () => {
         throw new Error('Password is required');
       }
       
-      // If username contains @, validate as email
-      if (formData.username.includes('@') && !isValidEmail(formData.username)) {
+      // If email contains @, validate as email
+      if (formData.email.includes('@') && !isValidEmail(formData.email)) {
         throw new Error('Please enter a valid email address');
       }
       
-      // Mock login - In a real app, you'd authenticate with your API
-      setTimeout(() => {
-        toast({
-          title: "Login Successful",
-          description: "Welcome back!",
-        });
-        
-        // Store mock user data
-        const mockUser = {
-          id: '123456',
-          username: formData.username,
-          email: formData.username.includes('@') ? formData.username : 'user@example.com',
-          role: 'user'
-        };
-        
-        navigate('/dashboard');
-      }, 1000);
-    } catch (error: any) {
-      setError(error.message);
-      toast({
-        title: "Login Failed",
-        description: error.message,
-        variant: "destructive",
+      const response = await apiService.login({
+        email: formData.email,
+        password: formData.password
       });
+      
+      toast.success("Login successful!");
+      setUser(response.user);
+      navigate('/dashboard');
+      
+    } catch (error: any) {
+      toast.error(error.message || 'Login failed');
+    } finally {
       setIsLoading(false);
     }
   };
@@ -101,11 +89,6 @@ const Login = () => {
           </div>
 
           <div className="mt-[50px] sm:mx-auto sm:w-full sm:max-w-sm">
-            {error && (
-              <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
-                {error}
-              </div>
-            )}
             <form className="space-y-3" onSubmit={handleSubmit}>
               {/* Username/Email Input */}
               <div className="relative mb-2">
@@ -114,8 +97,8 @@ const Login = () => {
                 </div>
                 <input
                   type="text"
-                  name="username"
-                  value={formData.username}
+                  name="email"
+                  value={formData.email}
                   onChange={handleChange}
                   className="auth-input"
                   placeholder="Enter your email or username"
