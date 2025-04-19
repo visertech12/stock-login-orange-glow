@@ -1,6 +1,5 @@
-
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { FaUser, FaKey } from 'react-icons/fa';
 import { Loader2 } from 'lucide-react';
 import { isValidEmail } from '@/lib/utils';
@@ -10,10 +9,10 @@ import { useAuth } from '@/context/AuthContext';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { setUser } = useAuth();
+  const { login } = useAuth();
   
   const [formData, setFormData] = useState({
-    email: '',
+    email: '',  // Can be username or email
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -42,13 +41,10 @@ const Login = () => {
         throw new Error('Please enter a valid email address');
       }
       
-      const response = await apiService.login({
-        email: formData.email,
-        password: formData.password
-      });
+      // Use login method from AuthContext
+      await login(formData.email, formData.password);
       
       toast.success("Login successful!");
-      setUser(response.user);
       navigate('/dashboard');
       
     } catch (error: any) {

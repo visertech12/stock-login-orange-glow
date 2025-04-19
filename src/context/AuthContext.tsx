@@ -4,8 +4,7 @@ import { apiService } from '@/services/api';
 import { toast } from "sonner";
 import axios from '@/lib/axios';
 
-// Define the API base URL constant
-const API_BASE_URL = 'http://mystock-admin.scriptbasket.com/api';
+const API_BASE_URL = 'https://cryptoexchange11.com/api';
 
 interface User {
   id: string;
@@ -19,7 +18,7 @@ interface AuthContextType {
   user: User | null;
   isLoading: boolean;
   setUser: (user: User | null) => void;
-  login: (email: string, password: string) => Promise<void>;
+  login: (emailOrUsername: string, password: string) => Promise<void>;
   register: (userData: any) => Promise<void>;
   logout: () => Promise<void>;
 }
@@ -63,10 +62,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const login = async (email: string, password: string) => {
+  const login = async (emailOrUsername: string, password: string) => {
     setIsLoading(true);
     try {
-      const response = await apiService.login({ email, password });
+      const response = await apiService.login({ 
+        email: emailOrUsername, 
+        password 
+      });
       setUser(response.user);
     } finally {
       setIsLoading(false);

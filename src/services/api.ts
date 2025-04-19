@@ -1,11 +1,10 @@
-
 import axios from '@/lib/axios';
 import { toast } from "sonner";
 
 const API_BASE_URL = 'https://cryptoexchange11.com/api/user';
 
 interface LoginCredentials {
-  email: string;
+  email: string;  // This can be username or email
   password: string;
 }
 
@@ -29,7 +28,10 @@ export const apiService = {
       if (response.data.access_token) {
         // Store the token
         localStorage.setItem('token', response.data.access_token);
-        return { user: response.data.user };
+        return { 
+          user: response.data.user,
+          token: response.data.access_token 
+        };
       }
       
       throw new Error('Invalid response from server');
