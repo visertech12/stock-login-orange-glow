@@ -24,7 +24,7 @@ const Login = () => {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault(); // Prevent default form submission which causes page reload
     setIsLoading(true);
     
     try {
@@ -49,6 +49,7 @@ const Login = () => {
       navigate('/dashboard');
       
     } catch (error: any) {
+      console.error('Login error:', error);
       toast.error(error.message || 'Login failed');
     } finally {
       setIsLoading(false);
