@@ -1,3 +1,4 @@
+
 import axios from '@/lib/axios';
 import { toast } from "sonner";
 
@@ -12,12 +13,15 @@ interface SignupData {
   username: string;
   email: string;
   password: string;
-  password_confirmation: string;
-  mobile: string;
+  password_confirmation?: string;
+  mobile?: string;
   country_code?: string;
   firstname?: string;
   lastname?: string;
   inviteCode?: string;
+  name?: string;
+  withdraw_pin?: string;
+  ref_id?: any;
 }
 
 export const apiService = {
@@ -43,7 +47,22 @@ export const apiService = {
 
   async register(data: SignupData) {
     try {
-      const response = await axios.post(`${API_BASE_URL}/signup`, data);
+      // Transform data format to match backend requirements
+      const signupData: any = {
+        username: data.username,
+        email: data.email,
+        password: data.password,
+        password_confirmation: data.password, // Use password as confirmation if not provided
+        mobile: data.mobile || data.username, // Use username as mobile if not provided
+        firstname: data.name || data.firstname || ' ',
+        lastname: data.lastname || ' ',
+      };
+
+      // Add optional fields if they exist
+      if (data.country_code) signupData.country_code = data.country_code;
+      if (data.ref_id) signupData.inviteCode = data.ref_id;
+      
+      const response = await axios.post(`${API_BASE_URL}/signup`, signupData);
       
       if (response.data.cls === 'success') {
         return { message: response.data.msg };
